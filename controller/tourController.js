@@ -1,8 +1,15 @@
 
  const { query } = require("express");
 const Tour = require("./../model/tourModel"); //JSON.parse(fs.readFileSync(`./tours-simple.json`, 'utf-8'));
+const APIFeatures = require('./../utils/apiFeatures');
 
 
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
 
 //functions
 // Get all tours
@@ -21,34 +28,46 @@ exports.getAllTours = async (req, res) => {
         //const tours = await Tour.find(JSON.parse(queryParam));
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
-      // **** Sort example**/
-      // const queryString = JSON.stringify(req.query.sort).split(',').join(" ");
+      /**** Sort example
+      const queryString = JSON.stringify(req.query.sort).split(',').join(" ");
 
-      // const parsedQuery= JSON.parse(queryString);
+      const parsedQuery= JSON.parse(queryString);
 
-      // const tours = await Tour.find().sort(parsedQuery);
+      const tours = await Tour.find().sort(parsedQuery); 
+      
+      **/
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------  
 
-      //******* field example *******/
+      /******* field example *****
 
-      // queryString = JSON.stringify(req.query.fields).split(',').join(" ");
-      // const parsedQuery= JSON.parse(queryString);
-      // const tours = await Tour.find().select(parsedQuery);
+      queryString = JSON.stringify(req.query.fields).split(',').join(" ");
+      const parsedQuery= JSON.parse(queryString);
+      const tours = await Tour.find().select(parsedQuery);**/
         
     //----------------------------------------------------------------------------------------------------------------------------------------------
 
     /**************  Pagination  *************/
       
-     var page = req.query.page*1;
-     var limited = req.query.limit*1;
-     console.log("page  limited ",page );
-     const tours = await Tour.find().skip(page-1).limit(limited);
+    //  var page = req.query.page*1;
+    //  var limited = req.query.limit*1;
+    //  console.log("page  limited ",page );
+    //  const tours = await Tour.find().skip(page-1).limit(limited);
         
 
 
         // Log the tours for debugging purposes
        // console.log("Tours", req.query);
+
+
+      
+        // EXECUTE QUERY
+        const features = new APIFeatures(Tour.find(), req.query)
+          .filter()
+          .sort()
+          .limitFields()
+          .paginate();
+        const tours = await features.query;
 
         // Send the successful response with tours data
         res.status(200).send({
@@ -105,7 +124,7 @@ exports.createNewTour = async (req, res) => {
 exports.findtours = async (req, res) => {
     try {
 
-        const tourId =req.params.id;
+        const tourId =req.params.id*1;
 
         console.log(tourId);
         // Fetch all tours from the database
@@ -247,3 +266,44 @@ exports.deleteTour = async (req, res) => {
       });
     }
   };
+
+  exports.getTourStats = async (req, res) => {
+    try {
+      const stats = await Tour.aggregate([
+        {
+          $match: { ratingsAverage: { $gte: 4.5 } }
+        },
+        {
+          $group: {
+            _id: { $toUpper: '$difficulty' },
+            numTours: { $sum: 1 },
+            numRatings: { $sum: '$ratingsQuantity' },
+            avgRating: { $avg: '$ratingsAverage' },
+            avgPrice: { $avg: '$price' },
+            minPrice: { $min: '$price' },
+            maxPrice: { $max: '$price' }
+          }
+        },
+        {
+          $sort: { avgPrice: 1 }
+        }
+      ]);
+  
+      res.status(200).json({
+        status: 'success',
+        data: {
+          stats
+        }
+      });
+    }catch (error) {
+      // Handle any errors that occur during the operation
+        console.error("Error finding the id of tour:", error);
+    
+      // Send an error response
+        res.status(500).send({
+          message: 'An error occurred while deleting the tours',
+          status: 500,
+          error: error.message,
+        });
+      }
+    };

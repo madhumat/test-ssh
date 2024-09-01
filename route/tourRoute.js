@@ -4,6 +4,13 @@ var tourRoute = express.Router();
 const tourController = require('../controller/tourController');
 
 //tourRoute.param('id',tourController.checkId);
+tourRoute.route('/aliasTopTours')
+.get(tourController.aliasTopTours,tourController.getAllTours)
+
+tourRoute.route('/stats')
+.get(tourController.getTourStats);
+
+
 //route handlers
 tourRoute.route('/')
 .get(tourController.getAllTours)
@@ -14,6 +21,8 @@ tourRoute.route('/:id')
 .get(tourController.findtours)
 .put(tourController.updateTour)
 .patch(tourController.patchTour);
+
+
 
 
 module.exports =tourRoute;
