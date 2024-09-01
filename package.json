@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "SET NODE_ENV=dev && nodemon server.js"
+    "start": "SET NODE_ENV=dev && nodemon server.js",
+    "start:import": "SET NODE_ENV=dev && node ./controller/import-data.js --import",
+    "start:delete": "SET NODE_ENV=dev && node ./controller/import-data.js --delete"
   },
   "keywords": [],
   "author": "",

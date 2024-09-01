@@ -7,13 +7,14 @@ const tourController = require('../controller/tourController');
 //route handlers
 tourRoute.route('/')
 .get(tourController.getAllTours)
-.post(tourController.createNewTour);
+.post(tourController.createNewTour)
+.delete(tourController.deleteTour);
 
 tourRoute.route('/:id')
 .get(tourController.findtours)
 .put(tourController.updateTour)
-.patch(tourController.patchTour)
-.delete(tourController.deleteTour);
+.patch(tourController.patchTour);
+
 
 module.exports =tourRoute;
 
