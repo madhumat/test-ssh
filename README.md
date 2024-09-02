@@ -152,3 +152,78 @@ Get monthly plan for $unwind , Date and  $match ,$group an agrregate
        ])
 
 _________________________________________________________________________________________________________________
+
+Data Model -virtual properties 
+
+* we can only add this property inside our API 
+* we can not query these value using find () 
+
+
+tourSchema.virtual('durationWeeks').get(function() {
+  return this.duration / 7;
+});
+
+In scheama :
+
+  {
+    toJSON:{virtuals:true},
+    toOBJECT:{virtuals:true}
+  }
+
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+Document middle ware 
+
+4 types of middle ware in mongoose 
+1. document  = runs before .save() and .create()
+2. Query 
+3. Aggregate 
+4. Modal middle ware 
+
+1. Document 
+  .pre 
+_________
+ tourSchema.pre('save', function(){
+    console.log(this);
+  });
+
+  {
+
+   tourSchema.pre('save', function(next){
+    this.slug = slugify(this.name,{lower:true});
+    next();
+  });
+
+
+  Post 
+  ____________
+  
+    tourSchema.post('save', function(doc, next){
+    console.log(doc)
+    next();
+  });
+
+
+  Querry Middle ware 
+  __________________
+
+tourSchema.pre(/^find/, function(next) {
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function(docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  next();
+});
+
+
+
+______________________________________________________________________________________________________________________
+
+
+
+
