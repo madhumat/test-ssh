@@ -10,6 +10,9 @@ tourRoute.route('/aliasTopTours')
 tourRoute.route('/stats')
 .get(tourController.getTourStats);
 
+tourRoute.route('/monthly-plan/:year')
+.get(tourController.getMonthlyPlan);
+
 
 //route handlers
 tourRoute.route('/')
@@ -21,7 +24,6 @@ tourRoute.route('/:id')
 .get(tourController.findtours)
 .put(tourController.updateTour)
 .patch(tourController.patchTour);
-
 
 
 

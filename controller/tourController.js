@@ -124,7 +124,7 @@ exports.createNewTour = async (req, res) => {
 exports.findtours = async (req, res) => {
     try {
 
-        const tourId =req.params.id*1;
+        const tourId =req.params.id;
 
         console.log(tourId);
         // Fetch all tours from the database
@@ -267,6 +267,7 @@ exports.deleteTour = async (req, res) => {
     }
   };
 
+  //aggregate function
   exports.getTourStats = async (req, res) => {
     try {
       const stats = await Tour.aggregate([
@@ -307,3 +308,68 @@ exports.deleteTour = async (req, res) => {
         });
       }
     };
+
+    exports.getMonthlyPlan = async (req, res) => {
+      try {
+        const year = req.params.year*1;
+        console.log(year);
+
+        const Plans = await Tour.aggregate([
+          {
+            $unwind:'$startDates', 
+          },{
+            $match: {
+            startDates:{
+              $gte:new Date(`'${year}-01-01'`),
+              $lte:new Date(`'${year}-12-31'`)
+            }
+          }
+
+        },
+          {
+            $group:{
+              _id :{$month:'$startDates'},
+              numToursStarts:{$sum:1},
+              tours: { $push: '$name' }
+            }
+            
+
+          },
+          // {
+          //   $project: {
+          //     _id: 0
+          //   }
+          // },
+
+          {
+            $sort: { numTourStarts: 1 }
+          },
+          {
+            $limit: 12
+          }
+         
+
+          
+        ]);
+        res.status(200).json({
+          status: 'success',
+          length: Plans.length,
+          data: {
+            Plans
+          }
+        });
+
+        
+
+      }catch (error) {
+        // Handle any errors that occur during the operation
+          console.error("Error finding the year of tour:", error);
+      
+        // Send an error response
+          res.status(500).send({
+            message: 'An error occurred while fingding the tours year',
+            status: 500,
+            error: error.message,
+          });
+        }
+      };
