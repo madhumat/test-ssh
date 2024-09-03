@@ -221,6 +221,16 @@ tourSchema.post(/^find/, function(docs, next) {
 });
 
 
+Aggregate middle ware  -> should be used in .aggregate function and please use it in .stats
+
+tourSchema.pre('aggregate', function(next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
+  console.log(this.pipeline());
+  next();
+});
+
+
 
 ______________________________________________________________________________________________________________________
 
