@@ -238,8 +238,8 @@ exports.patchTour = async (req, res) => {
 // Delete a tour
 exports.deleteTour = async (req, res) => {
   try{
-    //const tourId = req.params.id;
-    const deletedTour = await Tour.findOneAndDelete({name:"US"});
+    const tourId = req.params.id;
+    const deletedTour = await Tour.findOneAndDelete({ _id: tourId });
     console.log("Tour deleted");
 
     if (!deletedTour) {
@@ -373,3 +373,110 @@ exports.deleteTour = async (req, res) => {
           });
         }
       };
+      exports.getImagesAndCovers = async (req, res) => {
+        try {
+          const images = await Tour.aggregate([
+            {
+              $project: {
+                _id: 0,           // Exclude the _id field
+                imageCover: 1,    // Include the imageCover field
+                images: 1         // Include the images field
+              }
+            }
+          ]);
+      
+          // Send the images data in the response
+          res.status(200).json({
+            status: 'success',
+            data: {
+              images
+            }
+          });
+      
+        } catch (err) {
+          console.error('Error fetching tours:', err.message);
+          res.status(500).json({
+            status: 'error',
+            message: 'Error fetching tours'
+          });
+        }
+      };
+
+     exports.getMaxGroupSize = async (req, res) => {
+        try {
+          const groupedTours = await Tour.aggregate([
+            {
+              $group: {
+                _id: "$maxGroupSize", // Group by the maxGroupSize field
+                numTours: { $sum: 1 } // Count the number of tours in each group
+              }
+            },
+            {
+              $sort: { _id: 1 } // Sort the results by maxGroupSize in ascending order
+            }
+          ]);
+      
+          res.status(200).json({
+            status: 'success',
+            data: {
+              groupedTours
+            }
+          });
+        } catch (err) {
+          console.error('Error grouping tours by maxGroupSize:', err.message);
+          res.status(500).json({
+            status: 'error',
+            message: 'Error grouping tours by maxGroupSize',
+            error: err.message
+          });
+        }
+      };
+      exports.getGroupByYear = async (req, res) => {
+        try {
+
+          const Plans = await Tour.aggregate([
+            {
+              $unwind:'$startDates', 
+            },
+            {
+              $project: {
+                startDates: 1,
+                startDate: { $dateFromString: { dateString: "$startDates" } }
+              }
+            },
+            {
+              $group:{
+                _id :{$year:'$startDates'},
+                numToursStarts:{$sum:1},
+                tours: { $push: '$name' }
+              }
+              
+  
+            },
+            // {
+            //   $project: {
+            //     _id: 0
+            //   }
+            // },
+  
+            {
+              $sort: { numTourStarts: 1 }
+            }
+          ]);
+      
+          res.status(200).json({
+            status: 'success',
+            data: {
+              Plans
+            }
+          });
+        } catch (err) {
+          console.error('Error grouping tours by year:', err.message);
+          res.status(500).json({
+            status: 'error',
+            message: 'Error grouping tours by year',
+            error: err.message
+          });
+        }
+      };
+      

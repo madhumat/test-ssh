@@ -7,6 +7,16 @@ const tourController = require('../controller/tourController');
 tourRoute.route('/aliasTopTours')
 .get(tourController.aliasTopTours,tourController.getAllTours)
 
+
+tourRoute.route('/getImagesAndCovers')
+.get(tourController.getImagesAndCovers);
+
+tourRoute.route('/getGroupByYear')
+.get(tourController.getGroupByYear);
+
+tourRoute.route('/getMaxGroupSize')
+.get(tourController.getMaxGroupSize);
+
 tourRoute.route('/stats')
 .get(tourController.getTourStats);
 
@@ -17,13 +27,14 @@ tourRoute.route('/monthly-plan/:year')
 //route handlers
 tourRoute.route('/')
 .get(tourController.getAllTours)
-.post(tourController.createNewTour)
-.delete(tourController.deleteTour);
+.post(tourController.createNewTour);
+
 
 tourRoute.route('/:id')
 .get(tourController.findtours)
 .put(tourController.updateTour)
-.patch(tourController.patchTour);
+.patch(tourController.patchTour)
+.delete(tourController.deleteTour);
 
 
 
