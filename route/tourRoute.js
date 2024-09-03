@@ -11,8 +11,11 @@ tourRoute.route('/aliasTopTours')
 tourRoute.route('/getImagesAndCovers')
 .get(tourController.getImagesAndCovers);
 
-tourRoute.route('/getGroupByYear')
-.get(tourController.getGroupByYear);
+tourRoute.route('/getToursByYear')
+.get(tourController.getToursByYear);
+
+tourRoute.route('/monthly-plan/:year')
+.get(tourController.getMonthlyPlan);
 
 tourRoute.route('/getMaxGroupSize')
 .get(tourController.getMaxGroupSize);
@@ -20,8 +23,7 @@ tourRoute.route('/getMaxGroupSize')
 tourRoute.route('/stats')
 .get(tourController.getTourStats);
 
-tourRoute.route('/monthly-plan/:year')
-.get(tourController.getMonthlyPlan);
+
 
 
 //route handlers

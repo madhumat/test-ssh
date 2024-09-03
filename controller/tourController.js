@@ -431,52 +431,42 @@ exports.deleteTour = async (req, res) => {
           });
         }
       };
-      exports.getGroupByYear = async (req, res) => {
-        try {
-
-          const Plans = await Tour.aggregate([
-            {
-              $unwind:'$startDates', 
-            },
-            {
-              $project: {
-                startDates: 1,
-                startDate: { $dateFromString: { dateString: "$startDates" } }
-              }
-            },
-            {
-              $group:{
-                _id :{$year:'$startDates'},
-                numToursStarts:{$sum:1},
-                tours: { $push: '$name' }
-              }
-              
-  
-            },
-            // {
-            //   $project: {
-            //     _id: 0
-            //   }
-            // },
-  
-            {
-              $sort: { numTourStarts: 1 }
-            }
-          ]);
-      
-          res.status(200).json({
-            status: 'success',
-            data: {
-              Plans
-            }
-          });
-        } catch (err) {
-          console.error('Error grouping tours by year:', err.message);
-          res.status(500).json({
-            status: 'error',
-            message: 'Error grouping tours by year',
-            error: err.message
-          });
+      // Define the function
+exports.getToursByYear = async (req, res) => {
+  try {
+    const toursByYear = await Tour.aggregate([
+      {
+         $unwind: '$startDates'
+      },
+      { $group: { 
+        _id :{$year:'$startDates'}, 
+        numTours: { $sum: 1 }, 
+        tours: { $push: '$name' } 
+        } 
+      },
+      {
+        $project: {
+          _id: 0,           // Exclude the _id field
+          startDates:1,    // Include the imageCover field
+          name: 1         // Include the images field
         }
-      };
-      
+      },
+      { $sort: { 
+        _id: 1 } 
+      }
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: { toursByYear }
+    });
+
+  } catch (err) {
+    console.error('Error grouping tours by year:', err.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error grouping tours by year',
+      error: err.message
+    });
+  }
+};
