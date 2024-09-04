@@ -5,7 +5,7 @@ const tourController = require('../controller/tourController');
 
 //tourRoute.param('id',tourController.checkId);
 tourRoute.route('/aliasTopTours')
-.get(tourController.aliasTopTours,tourController.getAllTours)
+.get(tourController.aliasTopTours,tourController.getAllTours);
 
 
 tourRoute.route('/getImagesAndCovers')
@@ -13,6 +13,9 @@ tourRoute.route('/getImagesAndCovers')
 
 tourRoute.route('/getToursByYear')
 .get(tourController.getToursByYear);
+
+tourRoute.route('/getRatingsAverage')
+.get(tourController.getRatingsAverage);
 
 tourRoute.route('/monthly-plan/:year')
 .get(tourController.getMonthlyPlan);

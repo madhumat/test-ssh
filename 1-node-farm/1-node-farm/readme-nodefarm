@@ -1,0 +1,63 @@
+$unwind (aggregation)
+Definition
+$unwind
+Deconstructs an array field from the input documents to output a document for each element. Each output document is the input document with the value of the array field replaced by the element.
+
+Syntax
+You can pass a field path operand or a document operand to unwind an array field.
+
+Field Path Operand
+You can pass the array field path to $unwind. When using this syntax, $unwind does not output a document if the field value is null, missing, or an empty array.
+
+{ $unwind: <field path> }
+
+Examples
+Unwind Array
+In mongosh, create a sample collection named inventory with the following document:
+
+db.inventory.insertOne({ "_id" : 1, "item" : "ABC1", sizes: [ "S", "M", "L"] })
+
+The following aggregation uses the $unwind stage to output a document for each element in the sizes array:
+
+db.inventory.aggregate( [ { $unwind : "$sizes" } ] )
+
+The operation returns the following results:
+{ "_id" : 1, "item" : "ABC1", "sizes" : "S" }
+{ "_id" : 1, "item" : "ABC1", "sizes" : "M" }
+{ "_id" : 1, "item" : "ABC1", "sizes" : "L" }
+
+
+$month (aggregation)
+Definition
+$month
+Returns the month of a date as a number between 1 and 12.
+
+The $month expression has the following operator expression syntax:
+
+{ $month: <dateExpression> }
+
+The argument can be:
+
+An expression that resolves to a Date, a Timestamp, or an ObjectID.
+
+A document with this format:
+
+{ date: <dateExpression>, timezone: <tzExpression> }
+
+
+$year (aggregation)
+Definition
+$year
+Returns the year portion of a date.
+
+The $year expression has the following operator expression syntax:
+
+{ $year: <dateExpression> }
+
+The argument can be:
+
+An expression that resolves to a Date, a Timestamp, or an ObjectID.
+
+A document with this format:
+
+{ date: <dateExpression>, timezone: <tzExpression> }

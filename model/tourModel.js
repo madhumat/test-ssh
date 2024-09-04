@@ -1,6 +1,7 @@
 
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const validator = require("validator")
 
 const DB = 'mongodb://127.0.0.1:27017'
 mongoose.connect(DB).then(
@@ -19,7 +20,9 @@ mongoose.connect(DB).then(
         required: [true, 'A tour must have a name'],
         unique: true,
         trim: true,
-        // validate: [validator.isAlpha, 'Tour name must only contain characters']
+        maxlenth:[40,"hello this should be of max length 40"],
+        minlength:[10,"hello please maintain atleat 10 letter"],
+        validate: [validator.isAlpha, 'Tour name must only contain characters']
       },
       slug:String,
       duration: {
@@ -32,15 +35,21 @@ mongoose.connect(DB).then(
       },
       difficulty: {
         type: String,
-        required: [true, 'A tour must have a difficulty'],
+        required: [true, 'A tour must have a difficulty'], // "easy", "medium" , "difficult" 
+        enum :{
+          values:["easy", "medium" , "difficult"],
+          message:'the above values only should be error '
+         }
       },
       ratingsAverage: {
         type: Number,
         default: 4.5,
+        min:2,
+        max:5
       },
       ratingsQuantity: {
         type: Number,
-        default: 0
+        default: 0,
       },
       price: {
         type: Number,
@@ -48,7 +57,15 @@ mongoose.connect(DB).then(
       },
       priceDiscount: {
         type: Number,
-  
+        validate:{
+          validator: function (val){
+             // this only points to the current document on new document creation , this will not work on update documentation 
+            return val< this.price
+        },
+          message:`the price value should be greater than Discount price ({VALUE} )`
+        }
+        
+       
       },
       summary: {
         type: String,

@@ -146,3 +146,43 @@ exports.deleteTour = (req, res) => {
     data: null
   });
 };
+
+  
+exports.getRatingsAverage = async (req, res) => {
+  try{
+    const getRatings = await Tour.aggregate([
+      { $group: { 
+        _id :'$ratingsAverage', 
+        numTours: { $sum: 1 }, // Count the number of tours in each category
+        averageRating: { $avg: "$ratingsAverage" },
+        minRating: { $min: "$ratingsAverage" }, // Minimum rating in each category
+        maxRating: { $max: "$ratingsAverage" }, // Maximum rating in each category
+        tours: { $push: '$name' } 
+        } 
+      },
+      {
+        $project:
+        {
+          _id: 0,
+          name: 1 
+        }
+      },
+      {
+        // Debugging: Show the results after grouping
+        $sort: { "_id": 1 }
+      }
+    ]);
+    res.status(200).json({
+      status: 'success',
+      data: { getRatings }
+    });
+  
+  }catch (err) {
+    console.error('Error getting toursAverage:', err.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error getting toursAverage',
+      error: err.message
+    });
+  }
+};
