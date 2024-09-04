@@ -234,6 +234,228 @@ tourSchema.pre('aggregate', function(next) {
 
 ______________________________________________________________________________________________________________________
 
+Data Validation , sanitization  
+
+* we use the validation 
+eg : data validator built in , required , unique (its not validator)
+
+/// BUILT-IN Validators
+
+1. strings:
+maxlenth:[40,'tour must have less or qual to 40 Characters'],
+minLenth: 
+
+test  for below senarios 
+. create tour
+. Update Tour => run Validators 
+
+2. this is for Numbers 
+min 
+max
+
+test for below 
+ . for rating to update 
+
+3. Enum  -> use it for only strings
+ enum :{
+  values:[],
+  message:''
+ }
+
+ test for example : 
+
+ in difficulty 
+
+//CUSTOM  Validators 
+
+1. Adding validate 
+priceDiscount :{
+  type:Number
+  validate: function (val){
+      return val< this.price
+  }
+}
+
+
+2. Adding custom message with Validator.
+priceDiscount :{
+ type:Number
+ validate: {
+  validator: function (val){
+    // this only points to the current document on new document creation , this will not work on update documentation 
+      return val< this.price
+  },
+  message:'The value must have the discount ({VALUE} )'  
+}
+}
+
+3. check for custom validator -> validator in github 
+   https://github.com/validatorjs/validator.js
+
+   validate  works only strings 
+
+   validate: validator.isAlpha,
+   validate:[validator.isAlpha, 'validate only Alpha ']
+
+
+
+________________________________________________________________________________________________________________________________________
+
+Error handling strategy 
+
+1. to install Debuuger tool 
+
+"debug":"ndb server.js" -> downloads chromium 
+
+
+__________________________________________________________________________________________________________________________________
+
+Handling Rote handlers error
+
+app.all("*",(req,res,next)=>{
+  retuss.status(404).json({
+    status:"fail",
+    message:`the error in fetching the requested URL ${req.originalUrl} on the server`
+  })
+})
+
+
+_____________________________________________________________________________________________________________________________
+
+Error Handling 
+
+OPerational errors:
+
+Problems that we can predict for , it might happen at some point 
+. Invalid Path 
+.Wrong user input 
+faild to connect to the server 
+. failed to connected to the DB
+
+Programming Errors:
+
+. Sometimes getting an undefined values 
+. passing a string when number is expected 
+. using await instead of async 
+. using req.param instead req.query
+
+Global Error Handling middle ware 
+
+app.use((err,req,res,next)=>{
+err.statusCode =err.statusCode || 500;
+err.status = err.status || 'error';
+
+res.status(err.statusCode).json({
+  status = err.status,
+  message = err.message
+})
+})
+
+
+
+Handling the errors by thwing into the error handler in to get the middle ware  : next (err);
+-----------------------------------------------
+app.use((err,req,res,next)=>{
+const err = new Error(`the error in fetching the requested URL ${req.originalUrl} on the server`);
+err.statusCode =404;
+err.status = 'fail';
+next(err);
+})
+
+
+Global Handler with the class 
+-----------------------------
+
+class AppError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+
+    this.statusCode = statusCode;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+module.exports = AppError;
+
+/**if its an operational error:*/
+next(new AppError('No tour found with that ID', 404));
+
+
+Error Controller with class -> globalErrorHandler -> errorController.js
+-------------------------------------------------
+
+
+module.exports = (err,req,res,next)=>{
+err.statusCode =err.statusCode || 500;
+err.status = err.status || 'error';
+
+res.status(err.statusCode).json({
+  status = err.status,
+  message = err.message
+});
+}
+
+app.use(globalHandlers);
+
+
+Catching async errors 
+---------------------
+1. remove try catch block from the code 
+2. add the fn (function) to the block
+
+const catchAsync = fn =>{
+  fn(req,res,next).catch(err=>next(err))
+}
+
+exports.createNewTour = catchAsync( async (req, res next) => {
+    const newTour = await Tour.create(req.body);
+    res.status(201).send({
+      message: "Tour created successfully",
+      status: 201,
+      data: { tour: newTour },
+    });
+});
+
+\\\\*** to make express understand the req, res  **\
+
+const catchAsync = fn =>{
+  return (req,res,next)=> {
+  fn(req,res,next).catch(next)
+  }
+}
+
+\** module exports in utils **\
+
+module.exports = fn =>{
+  return (req,res,next)=> {
+  fn(req,res,next).catch(next)
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
 
 
 
