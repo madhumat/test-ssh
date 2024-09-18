@@ -21,7 +21,10 @@ exports.createUser = async (req, res) =>{               //create a new user
 
 exports.getAllUsers = async (req, res) => {     // Get all users
     try {
-      const users = await User.find();          // Fetch all users from the database
+      const users = await User.find()         // Fetch all users from the database
+      .select('id name emailId')           // Include only id, name, and emailId
+      .select('-__v -confirmPassword');      // Exclude __v and confirmPassword
+
   
       res.status(200).json({            // Send success response
         status: 'success',
